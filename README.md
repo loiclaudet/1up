@@ -29,19 +29,6 @@
 
 ![1up with a super nintendo pad: what each button sends written beside it, the pressed ones lit](docs/screenshot.png)
 
-<p align="center">
-  <a href="https://github.com/loiclaudet/1up/releases/latest/download/1up-setup.exe">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="design/download-dark.svg">
-      <img alt="Download for Windows" src="design/download.svg" width="367">
-    </picture>
-  </a>
-</p>
-
-<p align="center">
-  <sub><code>1up-setup.exe</code> installs 1up and the driver for its xbox pads, nothing else</sub>
-</p>
-
 ## three steps
 
 1. **install 1up.** [download `1up-setup.exe`](https://github.com/loiclaudet/1up/releases/latest/download/1up-setup.exe)
