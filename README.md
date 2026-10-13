@@ -19,7 +19,8 @@ with each button's mapping written on a picture of the pad.
 5. close the window: 1up keeps running in the tray. *start with windows* keeps it there from the start.
 
 1up reads the switch online nes, famicom, snes, n64 and genesis pads, the switch pro controller, and the joy-cons
-alone or paired. the nes, famicom and switch pro pads are drawn; the others show a schematic for now.
+alone or paired. all of them are drawn but the n64 and genesis pads and a lone joy-con, which show a schematic for
+now.
 
 ## known limits
 

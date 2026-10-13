@@ -36,6 +36,8 @@ const view: View = {
     pad(2, 'Nintendo Switch Pro Controller', 'switch_pro', 'switchpro', 0x2009),
     pad(3, 'Nintendo Family Computer Controller (1)', 'famicom1', 'standard', 0x2007),
     pad(4, 'Nintendo Family Computer Controller (2)', 'famicom2', 'standard', 0x2007),
+    pad(5, 'Nintendo SNES Controller', 'snes', 'standard', 0x2017),
+    pad(6, 'Nintendo Switch Joy-Con (L/R)', 'joy_con_pair', 'joyconpair', 0x2008),
   ],
 };
 for (const p of view.pads) {
