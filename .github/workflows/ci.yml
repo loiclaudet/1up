@@ -41,6 +41,34 @@ jobs:
           name: 1up-windows
           path: out/
 
+  # a real virtual xbox pad: vigembus installed on the runner (its installer's signature checked first), then the
+  # ignored test plugs a pad and reads it back through xinput
+  xbox-pad:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: vigembus
+        shell: pwsh
+        run: |
+          Invoke-WebRequest https://github.com/nefarius/ViGEmBus/releases/download/v1.22.0/ViGEmBus_1.22.0_x64_x86_arm64.exe -OutFile vigembus.exe
+          $sig = Get-AuthenticodeSignature ./vigembus.exe
+          "signature: $($sig.Status), $($sig.SignerCertificate.Subject)"
+          if ($sig.Status -ne 'Valid' -or $sig.SignerCertificate.Subject -notmatch 'Nefarius') { throw 'not the signed vigembus installer' }
+          $p = Start-Process ./vigembus.exe -ArgumentList '/quiet', '/norestart' -Wait -PassThru
+          "installer exit code: $($p.ExitCode)"
+      - run: cargo test --manifest-path src-tauri/Cargo.toml -- --ignored --nocapture
+
   # lodz's mac, where 1up is developed: the tests and the page's build
   mac:
     runs-on: macos-latest
