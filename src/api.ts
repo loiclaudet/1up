@@ -40,6 +40,13 @@ export const startup = {
   },
 };
 
+/// the xbox pads' driver, installed with vigembus's installer that 1up ships: windows asks first. true once it ran,
+/// false when this 1up has no installer to run (a build of one's own); rejected when declined or failed
+export function installDriver(): Promise<boolean> {
+  if (demo) return mock.installDriver();
+  return invoke('install_driver');
+}
+
 /// a link, in the person's browser
 export function openLink(url: string) {
   if (demo) window.open(url, '_blank', 'noreferrer');

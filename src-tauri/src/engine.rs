@@ -18,6 +18,10 @@ pub trait Sink: Send {
     fn slot(&self, pad: u32) -> Option<u8>;
     /// whether the virtual xbox pads can be made (vigembus installed)
     fn driver(&self) -> Driver;
+    /// a missing driver looked for again, every few seconds or `now`: true when it just turned up
+    fn look_again(&mut self, _now: bool) -> bool {
+        false
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
@@ -141,6 +145,27 @@ impl Engine {
         self.store.set(&pad.info.guid, &pad.info.name, pad.profile.clone());
         self.send(id, false);
         Ok(())
+    }
+
+    /// now and then, from the page's pump: a driver installed meanwhile turns up without a restart
+    pub fn tick(&mut self) {
+        self.look_again(false);
+    }
+
+    /// the driver's installer just finished: looked for at once
+    pub fn driver_installed(&mut self) {
+        self.look_again(true);
+    }
+
+    /// the driver turned up: every pad's output again, so the pads set to xbox get their xbox pads at once
+    fn look_again(&mut self, now: bool) {
+        if !self.sink.look_again(now) {
+            return;
+        }
+        for (id, pad) in &self.pads {
+            self.sink.send(*id, Some(&pad.out));
+        }
+        self.dirty = true;
     }
 
     /// the view the page draws, when something changed since it last asked
@@ -309,6 +334,53 @@ mod tests {
         // a release of what was not held changes nothing: nothing is sent
         engine.on(Event::Button { id: 7, button: 0, down: false });
         assert_eq!(sent.0.lock().unwrap().len(), count);
+    }
+
+    /// a sink whose driver is missing until it is looked for at once (the installer just finished)
+    #[derive(Clone, Default)]
+    struct Late {
+        sent: Sent,
+        found: Arc<Mutex<bool>>,
+    }
+
+    impl Sink for Late {
+        fn send(&mut self, pad: u32, out: Option<&Out>) {
+            self.sent.lock().unwrap().push((pad, out.cloned()));
+        }
+        fn slot(&self, _: u32) -> Option<u8> {
+            None
+        }
+        fn driver(&self) -> Driver {
+            if *self.found.lock().unwrap() { Driver::Ready } else { Driver::Missing }
+        }
+        fn look_again(&mut self, now: bool) -> bool {
+            let mut found = self.found.lock().unwrap();
+            if *found || !now {
+                return false;
+            }
+            *found = true;
+            true
+        }
+    }
+
+    #[test]
+    fn a_driver_installed_meanwhile_gives_every_pad_its_xbox_pad_at_once() {
+        let late = Late::default();
+        let mut engine = Engine::new(Store::memory(), Box::new(late.clone()));
+        engine.on(nes(1));
+        engine.on(nes(2));
+        assert_eq!(engine.view_if_changed().map(|v| v.driver), Some(Driver::Missing));
+        late.sent.lock().unwrap().clear();
+
+        engine.tick();
+        assert!(late.sent.lock().unwrap().is_empty(), "still missing: nothing sent again");
+        assert_eq!(engine.view_if_changed(), None);
+
+        engine.driver_installed();
+        let sent = late.sent.lock().unwrap().clone();
+        assert_eq!(sent.iter().map(|(id, _)| *id).collect::<Vec<_>>(), vec![1, 2]);
+        assert!(sent.iter().all(|(_, out)| out.as_ref().is_some_and(|o| o.xbox.is_some())), "each as an xbox pad");
+        assert_eq!(engine.view_if_changed().map(|v| v.driver), Some(Driver::Ready));
     }
 
     #[test]

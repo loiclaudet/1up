@@ -1,7 +1,7 @@
-// the rail: the pads plugged in, each drawn small, with where it goes; vigembus's state at the bottom
+// the rail: the pads plugged in, each drawn small, with where it goes; the xbox pads' driver at the bottom
 
 import { useEffect, useState } from 'react';
-import { openLink, startup } from '../api';
+import { installDriver, openLink, startup } from '../api';
 import { artOf } from '../pictures';
 import { padName } from '../labels';
 import { Logo } from './Logo';
@@ -15,7 +15,7 @@ export function destination(pad: PadView, driver: Driver): string {
       return 'Types keys';
     case 'xbox':
       if (pad.slot) return `Xbox pad ${pad.slot}`;
-      return driver === 'missing' ? 'Needs ViGEmBus' : driver === 'preview' ? 'Xbox pad, on Windows' : 'Xbox pad';
+      return driver === 'missing' ? 'Needs its driver' : driver === 'preview' ? 'Xbox pad, on Windows' : 'Xbox pad';
   }
 }
 
@@ -40,6 +40,55 @@ function StartWithWindows() {
       <span className="switch-track" aria-hidden />
       <span>Start with Windows</span>
     </label>
+  );
+}
+
+/// the xbox pads' driver: ready, or a button that installs it (1up's installer does, unless windows was told no)
+function DriverNote({ driver }: { driver: Driver }) {
+  const [install, setInstall] = useState<'idle' | 'running' | 'failed' | 'ran'>('idle');
+  if (driver === 'ready')
+    return (
+      <p>
+        <span className="dot ready" /> Xbox pads ready
+      </p>
+    );
+  if (driver === 'preview')
+    return (
+      <p>
+        <span className="dot preview" /> Preview. 1up sends to games on Windows.
+      </p>
+    );
+  if (install === 'running')
+    return (
+      <p aria-live="polite">
+        <span className="dot running" /> Installing the driver. Windows asks you to allow it.
+      </p>
+    );
+  const run = () => {
+    setInstall('running');
+    installDriver().then(
+      (ran) => {
+        if (!ran) openLink('https://github.com/nefarius/ViGEmBus/releases/latest');
+        setInstall(ran ? 'ran' : 'idle');
+      },
+      () => setInstall('failed'),
+    );
+  };
+  return (
+    <p aria-live="polite">
+      <span className="dot missing" />{' '}
+      {install === 'ran' ? (
+        <>Installed. If Xbox pads don’t come, restart Windows.</>
+      ) : (
+        <>
+          {install === 'failed' ? 'The driver didn’t install. ' : 'Xbox pads need a driver. '}
+          <button type="button" className="link" onClick={run}>
+            {install === 'failed' ? 'Try again' : 'Install it'}
+          </button>
+          . Keys work without it.
+        </>
+      )}
+    </p>
   );
 }
 
@@ -88,25 +137,7 @@ export function Rail({
       </ul>
       <footer className="driver">
         <StartWithWindows />
-        {driver === 'ready' && (
-          <p>
-            <span className="dot ready" /> Xbox pads ready
-          </p>
-        )}
-        {driver === 'missing' && (
-          <p>
-            <span className="dot missing" /> Xbox pads need{' '}
-            <button type="button" className="link" onClick={() => openLink('https://github.com/nefarius/ViGEmBus/releases/latest')}>
-              ViGEmBus
-            </button>
-            . Keys work without it.
-          </p>
-        )}
-        {driver === 'preview' && (
-          <p>
-            <span className="dot preview" /> Preview. 1up sends to games on Windows.
-          </p>
-        )}
+        <DriverNote driver={driver} />
       </footer>
     </nav>
   );

@@ -1,6 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "1up",
+  "mainBinaryName": "1up",
   "version": "0.1.0",
   "identifier": "com.loiclaudet.oneup",
   "build": {
@@ -37,7 +38,9 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "shortDescription": "a free rewasd for nintendo pads on windows",
+    "shortDescription": "turns nintendo pads into xbox pads on windows",
+    "publisher": "Loïc Laudet",
+    "homepage": "https://github.com/loiclaudet/1up",
     "copyright": "MIT, Loïc Laudet"
   }
 }
