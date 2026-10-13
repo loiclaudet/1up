@@ -34,7 +34,7 @@ jobs:
         run: |
           mkdir out
           cp src-tauri/target/release/bundle/nsis/*-setup.exe out/
-          cp src-tauri/target/release/1up.exe out/1up-portable.exe
+          cp src-tauri/target/release/oneup.exe out/1up-portable.exe
           ls -la out
       - uses: actions/upload-artifact@v7
         with:
