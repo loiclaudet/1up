@@ -125,21 +125,22 @@ mod tests {
     use windows_sys::Win32::UI::Input::XboxController::{XINPUT_STATE, XInputGetState};
 
     /// needs vigembus: ci installs it on its windows runner, then runs `cargo test -- --ignored`. the bus's side is
-    /// checked hard (connect, plug, ready, update, unplug); xinput's only where windows gives the pad a number: a
-    /// windows server (ci's runners) may have no xbox 360 driver to give one, and then says so
+    /// checked hard (it answers, it takes a pad, it lets go of it). the rest needs windows' own xbox 360 driver,
+    /// which a windows server (ci's runners) lacks: there the pad never starts (WinError 483) and the test says so;
+    /// on a windows pc it starts, takes a report, and xinput reads it back
     #[test]
     #[ignore]
     fn a_virtual_xbox_pad_plugs_in_and_reaches_xinput() {
         let client = Arc::new(Client::connect().expect("vigembus answers"));
         let mut target = Xbox360Wired::new(client, TargetId::XBOX360_WIRED);
         target.plugin().expect("plugged in");
-        target.wait_ready().expect("ready");
-        let report = XGamepad { buttons: XButtons { raw: 0x1000 }, left_trigger: 255, ..Default::default() };
-        target.update(&report).expect("updated");
-        thread::sleep(Duration::from_millis(500));
-        target.update(&report).expect("updated again");
-        match target.get_user_index() {
-            Ok(index) => {
+        match target.wait_ready() {
+            Ok(()) => {
+                let report = XGamepad { buttons: XButtons { raw: 0x1000 }, left_trigger: 255, ..Default::default() };
+                target.update(&report).expect("updated");
+                thread::sleep(Duration::from_millis(500));
+                target.update(&report).expect("updated again");
+                let index = target.get_user_index().expect("windows gave the pad a number");
                 let mut state: XINPUT_STATE = unsafe { std::mem::zeroed() };
                 let got = unsafe { XInputGetState(index, &mut state) };
                 assert_eq!(got, 0, "xinput sees pad {index}");
@@ -147,7 +148,7 @@ mod tests {
                 assert_eq!(state.Gamepad.bLeftTrigger, 255, "LT pulled");
                 eprintln!("xinput reads pad {index}: A held, LT pulled");
             }
-            Err(e) => eprintln!("no xinput number ({e:?}): this windows has no xbox 360 driver for the pad"),
+            Err(e) => eprintln!("vigembus took the pad, windows did not start it ({e:?}): no xbox 360 driver here"),
         }
         target.unplug().expect("unplugged");
     }
