@@ -1,8 +1,896 @@
 @import 'tailwindcss';
 
+/* 1up: a quiet paper page, warm near-black ink, one live colour (a highlighter lime) for what is pressed. the pads
+   keep their own colours. .impeccable.md has the why */
+:root {
+  --paper: oklch(0.982 0.004 115);
+  --paper-2: oklch(0.958 0.006 115);
+  --paper-3: oklch(0.928 0.008 115);
+  --surface: oklch(0.995 0.002 115);
+  --stage-hi: oklch(0.997 0.002 115);
+  --line: oklch(0.89 0.008 115);
+  --line-2: oklch(0.8 0.01 115);
+  --ink: oklch(0.22 0.014 125);
+  --ink-2: oklch(0.44 0.012 120);
+  --ink-3: oklch(0.6 0.01 118);
+  --live: oklch(0.9 0.19 124);
+  --live-deep: oklch(0.55 0.15 130);
+  --live-ink: oklch(0.3 0.08 130);
+  --warn: oklch(0.63 0.17 45);
+  --shade: oklch(0.22 0.02 120);
+  --display: 'Darker Grotesque Variable', system-ui, sans-serif;
+  --sans: 'Onest Variable', system-ui, sans-serif;
+  --out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  color-scheme: light;
+  font-family: var(--sans);
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 html,
-body {
+body,
+#root {
+  height: 100%;
   margin: 0;
-  background: #0a0a0a;
+  overflow: hidden;
   user-select: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--live-deep);
+  outline-offset: 2px;
+}
+
+.eyebrow {
+  margin: 0;
+  font: 600 11px/1.2 var(--sans);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.hint {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+.ghost {
+  padding: 9px 12px;
+  border-radius: 9px;
+  font: 600 13px/1 var(--sans);
+  color: var(--ink-2);
+  transition: background 120ms, color 120ms;
+}
+
+.ghost:hover {
+  background: var(--paper-2);
+  color: var(--ink);
+}
+
+.solid {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font: 600 13px/1 var(--sans);
+  color: var(--surface);
+  background: var(--ink);
+}
+
+/* ------------------------------------------------------------------------------------------------- the frame */
+
+.app {
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr) 0;
+  height: 100%;
+}
+
+.app.editing {
+  grid-template-columns: 248px minmax(0, 1fr) 328px;
+}
+
+/* ------------------------------------------------------------------------------------------------- the rail */
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 22px 14px 16px;
+  background: var(--paper-2);
+  border-right: 1px solid var(--line);
+}
+
+.brand {
+  padding: 0 10px;
+}
+
+.wordmark {
+  font: 800 46px/0.85 var(--display);
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.rail-title {
+  margin: 26px 10px 8px;
+}
+
+.pad-list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+}
+
+.pad-list-empty {
+  padding: 8px 10px;
+  color: var(--ink-3);
+}
+
+.pad-item {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+  border-radius: 12px;
+  text-align: left;
+  transition: background 140ms;
+}
+
+.pad-item:hover {
+  background: var(--paper-3);
+}
+
+.pad-item.on {
+  background: var(--surface);
+  box-shadow:
+    0 0 0 1px var(--line),
+    0 8px 20px -14px oklch(from var(--shade) l c h / 0.4);
+}
+
+.thumb {
+  display: block;
+  pointer-events: none;
+}
+
+.thumb svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 4px 5px oklch(from var(--shade) l c h / 0.16));
+}
+
+.pad-item-name {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.pad-item-dest {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.driver {
+  margin-top: auto;
+  padding: 14px 10px 0;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.driver p {
+  margin: 0;
+}
+
+.driver a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 5px;
+  border-radius: 50%;
+  vertical-align: 1px;
+}
+
+.dot.ready {
+  background: var(--live);
+  box-shadow: 0 0 0 3px oklch(from var(--live) l c h / 0.3);
+}
+
+.dot.missing {
+  background: var(--warn);
+}
+
+.dot.preview {
+  background: var(--ink-3);
+}
+
+/* ------------------------------------------------------------------------------------------------- the header */
+
+.main {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+  background: var(--paper);
+}
+
+
+.pad-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 24px;
+  padding: 26px 28px 0 36px;
+}
+
+.pad-title {
+  flex: 1 1 300px;
+  min-width: 0;
+}
+
+.pad-title h1 {
+  margin: 0;
+  overflow: hidden;
+  font: 750 40px/1 var(--display);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  margin: 9px 0 0;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.pad-settings {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--paper-2);
+}
+
+.segmented button {
+  padding: 9px 14px;
+  border-radius: 8px;
+  font: 600 13px/1 var(--sans);
+  color: var(--ink-2);
+  transition: background 140ms, color 140ms, box-shadow 140ms;
+}
+
+.segmented button:hover {
+  color: var(--ink);
+}
+
+.segmented button.on {
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow:
+    0 0 0 1px var(--line),
+    0 1px 3px oklch(from var(--shade) l c h / 0.12);
+}
+
+.segmented.small button {
+  padding: 7px 11px;
+  font-size: 12px;
+}
+
+.preset {
+  position: relative;
+}
+
+/* the preset's meaning, shown while the pointer or the focus is on it */
+.note {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 5;
+  width: 250px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--paper);
+  background: var(--ink);
+  box-shadow: 0 10px 24px -12px oklch(from var(--shade) l c h / 0.5);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 160ms, transform 160ms var(--out);
+}
+
+.preset:hover .note,
+.preset:focus-within .note {
+  opacity: 1;
+  transform: none;
+}
+
+/* ------------------------------------------------------------------------------------------------- the stage */
+
+.stage {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  background: radial-gradient(ellipse 52% 58% at 50% 52%, var(--stage-hi), transparent 74%);
+}
+
+.stage-floor {
+  position: absolute;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, oklch(from var(--shade) l c h / 0.2), transparent);
+  pointer-events: none;
+}
+
+.stage-pad {
+  position: absolute;
+}
+
+.pad-picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.stage-pad .pad-picture {
+  filter: drop-shadow(0 20px 22px oklch(from var(--shade) l c h / 0.14))
+    drop-shadow(0 3px 4px oklch(from var(--shade) l c h / 0.16));
+}
+
+.stage-lines {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.leader path {
+  fill: none;
+  stroke: var(--line-2);
+  stroke-width: 1;
+  transition: stroke 90ms;
+}
+
+.leader circle {
+  fill: var(--surface);
+  stroke: var(--ink-3);
+  stroke-width: 1.25;
+  transition: fill 90ms, stroke 90ms;
+}
+
+.leader.lit path {
+  stroke: var(--live-deep);
+}
+
+.leader.lit circle {
+  fill: var(--live);
+  stroke: var(--live-deep);
+}
+
+.leader.selected path {
+  stroke: var(--ink);
+  stroke-width: 1.25;
+}
+
+.leader.selected circle {
+  fill: var(--ink);
+  stroke: var(--ink);
+}
+
+.callout {
+  position: absolute;
+  display: grid;
+  gap: 2px;
+  justify-items: start;
+  padding: 0 2px;
+  border-radius: 9px;
+  white-space: nowrap;
+}
+
+.callout.left {
+  justify-items: end;
+  text-align: right;
+}
+
+.callout.top,
+.callout.bottom {
+  justify-items: center;
+  transform: translateX(-50%);
+}
+
+.callout-from {
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 14px;
+  letter-spacing: 0.01em;
+  color: var(--ink-3);
+}
+
+.callout-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.callout.left .callout-row {
+  flex-direction: row-reverse;
+}
+
+.callout-to {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--ink);
+  background: var(--surface);
+  transition: background 90ms, border-color 90ms, color 90ms, box-shadow 90ms;
+}
+
+.callout-press {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.callout:hover .callout-to {
+  border-color: var(--line-2);
+}
+
+.callout:hover .callout-from {
+  color: var(--ink-2);
+}
+
+.callout.empty .callout-to {
+  font-weight: 500;
+  font-style: italic;
+  color: var(--ink-3);
+  background: transparent;
+  border-style: dashed;
+}
+
+.callout.lit .callout-to {
+  color: var(--live-ink);
+  background: var(--live);
+  border-color: var(--live-deep);
+  font-style: normal;
+}
+
+.callout.lit .callout-from {
+  color: var(--live-deep);
+}
+
+.callout.selected .callout-to {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 1px var(--ink);
+}
+
+.callout.selected .callout-from {
+  color: var(--ink);
+}
+
+.stage-off .callout,
+.stage-off .leader {
+  opacity: 0.4;
+}
+
+/* the pads' own parts: a ring lights a held part, a marching ring marks the one being edited */
+.pad-control {
+  cursor: pointer;
+}
+
+.pad-control > .ring {
+  stroke: transparent;
+  stroke-width: 3.5;
+  transition: stroke 90ms;
+}
+
+.pad-control:hover > .ring {
+  stroke: oklch(from var(--ink) l c h / 0.25);
+}
+
+.pad-control.held > .ring {
+  stroke: var(--live);
+}
+
+.pad-control.held {
+  filter: drop-shadow(0 0 5px var(--live));
+}
+
+.pad-control.held:not([data-part*='stick']) {
+  transform: translateY(1.2px);
+}
+
+.pad-control.selected > .ring {
+  stroke: var(--ink);
+  stroke-dasharray: 6 5;
+  animation: march 1s linear infinite;
+}
+
+@keyframes march {
+  to {
+    stroke-dashoffset: -22;
+  }
+}
+
+.pad-print {
+  font: 700 9px var(--sans);
+  letter-spacing: 0.08em;
+  pointer-events: none;
+}
+
+.pad-print-mark {
+  font: 800 12px var(--sans);
+  pointer-events: none;
+}
+
+.pad-letter {
+  font: 800 14px var(--sans);
+  pointer-events: none;
+}
+
+.pad-face {
+  font: 700 12.5px var(--sans);
+  pointer-events: none;
+}
+
+/* the schematic of a pad with no picture of its own yet */
+.schematic .schematic-body {
+  fill: var(--paper-2);
+  stroke: var(--ink-3);
+  stroke-width: 1.5;
+}
+
+.schematic .pad-control rect,
+.schematic .pad-control circle {
+  fill: var(--surface);
+  stroke: var(--ink-3);
+  stroke-width: 1.5;
+  transition: fill 90ms;
+}
+
+.schematic .pad-control .cap {
+  fill: var(--paper-3);
+}
+
+.schematic .pad-control text {
+  font: 700 11px var(--sans);
+  fill: var(--ink-2);
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.schematic .pad-control.held rect,
+.schematic .pad-control.held circle {
+  fill: var(--live);
+  stroke: var(--live-deep);
+}
+
+.schematic .pad-control.selected rect,
+.schematic .pad-control.selected circle {
+  stroke: var(--ink);
+  stroke-dasharray: 5 4;
+  animation: march 1s linear infinite;
+}
+
+/* ------------------------------------------------------------------------------------------------- the picker */
+
+.picker {
+  min-width: 0;
+  padding: 24px 22px;
+  overflow-y: auto;
+  border-left: 1px solid var(--line);
+  background: var(--surface);
+  animation: slide-in 320ms var(--out);
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+}
+
+.picker-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.picker-head h2 {
+  margin: 6px 0 0;
+  font: 750 32px/0.95 var(--display);
+  letter-spacing: -0.01em;
+}
+
+.targets {
+  display: grid;
+  gap: 22px;
+}
+
+.targets h3 {
+  margin: 0 0 10px;
+  font: 600 12px/1.2 var(--sans);
+  color: var(--ink-2);
+}
+
+.target {
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  font: 650 13px/1.1 var(--sans);
+  color: var(--ink);
+  background: var(--paper-2);
+  transition: background 120ms, border-color 120ms, color 120ms;
+}
+
+.target:hover {
+  background: var(--paper-3);
+  border-color: var(--line-2);
+}
+
+.target.on {
+  color: var(--surface);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.diamond {
+  position: relative;
+  width: 132px;
+  height: 124px;
+  margin: 0 auto;
+}
+
+.target.face {
+  position: absolute;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 14px;
+}
+
+.face-top {
+  top: 0;
+  left: 45px;
+}
+
+.face-left {
+  top: 41px;
+  left: 0;
+}
+
+.face-right {
+  top: 41px;
+  left: 90px;
+}
+
+.face-bottom {
+  top: 82px;
+  left: 45px;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+.grid3 .target {
+  grid-column: span 2;
+}
+
+.grid3 .target:nth-child(n + 4) {
+  grid-column: span 3;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  justify-content: space-between;
+}
+
+.cross {
+  display: grid;
+  grid-template-columns: repeat(3, 26px);
+  grid-template-rows: repeat(3, 26px);
+  gap: 2px;
+}
+
+.cross .target {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.cross-up {
+  grid-area: 1 / 2;
+}
+
+.cross-left {
+  grid-area: 2 / 1;
+}
+
+.cross-right {
+  grid-area: 2 / 3;
+}
+
+.cross-down {
+  grid-area: 3 / 2;
+}
+
+.list {
+  display: grid;
+  gap: 8px;
+}
+
+.target.wide {
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.nothing {
+  justify-self: start;
+  padding: 8px 12px;
+  border: 1px dashed var(--line-2);
+  border-radius: 9px;
+  font: 600 13px/1 var(--sans);
+  color: var(--ink-2);
+}
+
+.nothing.on {
+  color: var(--ink);
+  border-style: solid;
+  border-color: var(--ink);
+}
+
+.divider {
+  height: 1px;
+  background: var(--line);
+}
+
+.subhead {
+  margin: 0;
+  font: 750 22px/1 var(--display);
+  color: var(--ink);
+}
+
+.key-capture {
+  display: grid;
+  gap: 10px;
+}
+
+.keycap {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 78px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  font: 750 30px/1 var(--display);
+  color: var(--ink);
+  background: var(--paper-2);
+  box-shadow: inset 0 -3px 0 var(--line);
+}
+
+.keycap.blank {
+  color: var(--ink-3);
+}
+
+.keycap .listening {
+  display: block;
+  margin-bottom: 6px;
+  font: 600 11px/1 var(--sans);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--live-deep);
+}
+
+.keycap.armed {
+  border-color: var(--live-deep);
+  color: var(--live-ink);
+  background: oklch(from var(--live) l c h / 0.35);
+  box-shadow: inset 0 -3px 0 oklch(from var(--live-deep) l c h / 0.4);
+}
+
+.picker-off p {
+  margin: 0 0 14px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+/* ------------------------------------------------------------------------------------------------- no pad */
+
+.empty {
+  grid-row: 1 / -1;
+  align-self: center;
+  justify-self: center;
+  max-width: 46ch;
+}
+
+.empty h1 {
+  margin: 0 0 14px;
+  font: 750 52px/0.95 var(--display);
+  letter-spacing: -0.01em;
+}
+
+.empty p {
+  margin: 0;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .picker {
+    animation: none;
+  }
+
+  .pad-control.selected > .ring,
+  .schematic .pad-control.selected rect,
+  .schematic .pad-control.selected circle {
+    animation: none;
+  }
 }
