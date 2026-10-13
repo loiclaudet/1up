@@ -26,6 +26,8 @@ now.
 
 - a game that also reads the nintendo pad itself (steam with its switch support on, an sdl based emulator) sees it
   twice: once as itself, once as 1up's xbox pad. turn one of them off there.
+- a game running as administrator ignores the keys 1up types (windows keeps a normal app's keystrokes out of it):
+  run 1up as administrator too, or use the xbox pad, which has no such limit.
 - windows may warn about an unknown publisher: 1up isn't signed. *more info*, then *run anyway*.
 - a pad misbehaving? *details* (top right) has a report to copy into an issue.
 
