@@ -29,6 +29,18 @@ jobs:
       - run: pnpm build
       - run: cargo test --manifest-path src-tauri/Cargo.toml
       - run: pnpm tauri build --bundles nsis
+      # the app itself on windows: it starts, SDL comes up on its thread, it writes its log
+      - name: smoke
+        shell: pwsh
+        run: |
+          $app = Start-Process src-tauri/target/release/oneup.exe -PassThru
+          Start-Sleep -Seconds 12
+          $logs = "$env:LOCALAPPDATA\com.loiclaudet.oneup\logs"
+          Get-ChildItem $logs
+          $log = Get-ChildItem $logs -Filter *.log | Select-Object -First 1
+          Get-Content $log.FullName
+          Stop-Process -Id $app.Id -Force
+          if (-not (Select-String -Path $log.FullName -Pattern 'sdl: up' -Quiet)) { throw 'sdl did not come up' }
       - name: gather
         shell: bash
         run: |
