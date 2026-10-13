@@ -1,5 +1,6 @@
-# every push and pull request: the tests on windows and on a mac, and the windows app built on a real windows
-# machine (msvc and cmake native, for sdl). a v* tag also makes a draft release with the installer and the bare exe
+# every push and pull request: the tests on windows and on a mac, and the windows installer built on a real windows
+# machine (msvc and cmake native, for sdl), then installed and started there. a v* tag also makes a draft release
+# with the installer, under a name that never changes (1up-setup.exe), so the readme can link the latest one
 name: ci
 
 on:
@@ -9,7 +10,8 @@ on:
     tags: ['v*']
 
 jobs:
-  # the tests, then the app: one windows runner does both, so the build never waits on a mac
+  # the tests, then the installer, then what someone who downloads it gets: one windows runner does it all, so the
+  # build never waits on a mac
   windows:
     runs-on: windows-latest
     steps:
@@ -27,13 +29,36 @@ jobs:
       - run: pnpm test
       # the rust side embeds the built page: built first
       - run: pnpm build
+      # the driver's installer, which 1up's installer carries: fetched, its signature and hash checked
+      - run: ./src-tauri/windows/fetch-driver.ps1
+        shell: pwsh
       - run: cargo test --manifest-path src-tauri/Cargo.toml
       - run: pnpm tauri build --bundles nsis
-      # the app itself on windows: it starts, SDL comes up on its thread, it writes its log
+      - name: gather
+        shell: bash
+        run: |
+          mkdir out
+          cp src-tauri/target/release/bundle/nsis/*-setup.exe out/1up-setup.exe
+          ls -la out
+      - uses: actions/upload-artifact@v7
+        with:
+          name: 1up-windows
+          path: out/
+      # the download, as someone runs it (silent here): 1up in their apps, and the driver installed by it
+      - name: install
+        shell: pwsh
+        run: |
+          $p = Start-Process out/1up-setup.exe -ArgumentList '/S' -Wait -PassThru
+          "installer exit code: $($p.ExitCode)"
+          Get-ChildItem "$env:LOCALAPPDATA\1up" -Recurse | Select-Object FullName, Length
+          if (-not (Test-Path "$env:LOCALAPPDATA\1up\1up.exe")) { throw '1up was not installed' }
+          sc.exe query ViGEmBus
+          if (-not (Test-Path HKLM:\SYSTEM\CurrentControlSet\Services\ViGEmBus)) { throw 'the driver was not installed' }
+      # 1up as installed: it starts, SDL comes up on its thread, the driver answers, it writes its log
       - name: smoke
         shell: pwsh
         run: |
-          $app = Start-Process src-tauri/target/release/oneup.exe -PassThru
+          $app = Start-Process "$env:LOCALAPPDATA\1up\1up.exe" -PassThru
           Start-Sleep -Seconds 12
           $logs = "$env:LOCALAPPDATA\com.loiclaudet.oneup\logs"
           Get-ChildItem $logs
@@ -41,44 +66,9 @@ jobs:
           Get-Content $log.FullName
           Stop-Process -Id $app.Id -Force
           if (-not (Select-String -Path $log.FullName -Pattern 'sdl: up' -Quiet)) { throw 'sdl did not come up' }
-      - name: gather
-        shell: bash
-        run: |
-          mkdir out
-          cp src-tauri/target/release/bundle/nsis/*-setup.exe out/
-          cp src-tauri/target/release/oneup.exe out/1up-portable.exe
-          ls -la out
-      - uses: actions/upload-artifact@v7
-        with:
-          name: 1up-windows
-          path: out/
-
-  # a real virtual xbox pad: vigembus installed on the runner (its installer's signature checked first), then the
-  # ignored test plugs a pad and reads it back through xinput
-  xbox-pad:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: pnpm
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: src-tauri
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - name: vigembus
-        shell: pwsh
-        run: |
-          Invoke-WebRequest https://github.com/nefarius/ViGEmBus/releases/download/v1.22.0/ViGEmBus_1.22.0_x64_x86_arm64.exe -OutFile vigembus.exe
-          $sig = Get-AuthenticodeSignature ./vigembus.exe
-          "signature: $($sig.Status), $($sig.SignerCertificate.Subject)"
-          if ($sig.Status -ne 'Valid' -or $sig.SignerCertificate.Subject -notmatch 'Nefarius') { throw 'not the signed vigembus installer' }
-          $p = Start-Process ./vigembus.exe -ArgumentList '/quiet', '/norestart' -Wait -PassThru
-          "installer exit code: $($p.ExitCode)"
+          if (-not (Select-String -Path $log.FullName -Pattern 'vigembus: ready' -Quiet)) { throw 'the driver did not answer' }
+      # a real virtual xbox pad, on the driver 1up's installer put there: the ignored test plugs one in and reads it
+      # back through xinput
       - run: cargo test --manifest-path src-tauri/Cargo.toml -- --ignored --nocapture
 
   # lodz's mac, where 1up is developed: the tests and the page's build

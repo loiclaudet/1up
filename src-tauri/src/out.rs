@@ -1,6 +1,7 @@
 //! windows' outputs: a virtual xbox 360 pad per pad set to xbox (vigembus, through vigem-client), and the keys
 //! (keys.rs). vigembus missing: keys only, and 1up looks for it again every few seconds, so installing it needs no
-//! restart
+//! restart. 1up's installer installs vigembus with vigembus's own installer, which 1up ships (`install_driver` runs
+//! it again from the page)
 
 use crate::engine::{Driver, Sink};
 use crate::keys::{self, Keys};
@@ -26,33 +27,22 @@ pub struct Windows {
     keys: Keys,
 }
 
-fn connect() -> Option<Arc<Client>> {
-    match Client::connect() {
-        Ok(client) => Some(Arc::new(client)),
-        Err(e) => {
-            log::warn!("vigembus: {e:?}, no xbox pads until it is installed");
-            None
-        }
-    }
+fn connect() -> Result<Arc<Client>, vigem_client::Error> {
+    let client = Arc::new(Client::connect()?);
+    log::info!("vigembus: ready");
+    Ok(client)
 }
 
 impl Windows {
     pub fn new() -> Windows {
-        Windows { client: connect(), looked: Instant::now(), pads: HashMap::new(), keys: Keys::default() }
-    }
-
-    fn client(&mut self) -> Option<Arc<Client>> {
-        if self.client.is_none() && self.looked.elapsed() > LOOK_AGAIN {
-            self.looked = Instant::now();
-            self.client = connect();
-        }
-        self.client.clone()
+        let client = connect().inspect_err(|e| log::warn!("vigembus: {e:?}, no xbox pads until it is installed"));
+        Windows { client: client.ok(), looked: Instant::now(), pads: HashMap::new(), keys: Keys::default() }
     }
 
     /// the pad's virtual xbox pad, plugged in now if it had none
     fn plugged(&mut self, pad: u32) -> Option<&mut Pad> {
         if !self.pads.contains_key(&pad) {
-            let client = self.client()?;
+            let client = self.client.clone()?;
             let mut target = Xbox360Wired::new(client, TargetId::XBOX360_WIRED);
             if let Err(e) = target.plugin().and_then(|_| target.wait_ready()) {
                 log::error!("pad {pad}: no xbox pad ({e:?})");
@@ -107,6 +97,57 @@ impl Sink for Windows {
 
     fn driver(&self) -> Driver {
         if self.client.is_some() { Driver::Ready } else { Driver::Missing }
+    }
+
+    fn look_again(&mut self, now: bool) -> bool {
+        if self.client.is_some() || (!now && self.looked.elapsed() < LOOK_AGAIN) {
+            return false;
+        }
+        self.looked = Instant::now();
+        self.client = connect().ok();
+        self.client.is_some()
+    }
+}
+
+/// vigembus's own installer, run as windows' administrator: windows asks first, naming nefarius, who signed it.
+/// returns once it is done, `Err` when it was declined or failed
+pub fn install_driver(installer: &std::path::Path) -> Result<(), String> {
+    use std::os::windows::ffi::OsStrExt;
+    use windows_sys::Win32::Foundation::CloseHandle;
+    use windows_sys::Win32::System::Threading::{GetExitCodeProcess, INFINITE, WaitForSingleObject};
+    use windows_sys::Win32::UI::Shell::{SEE_MASK_NOASYNC, SEE_MASK_NOCLOSEPROCESS, SHELLEXECUTEINFOW, ShellExecuteExW};
+
+    let wide = |s: &std::ffi::OsStr| s.encode_wide().chain([0]).collect::<Vec<u16>>();
+    let (verb, file, args) = (wide("runas".as_ref()), wide(installer.as_os_str()), wide("/quiet /norestart".as_ref()));
+    let mut run: SHELLEXECUTEINFOW = unsafe { std::mem::zeroed() };
+    run.cbSize = size_of::<SHELLEXECUTEINFOW>() as u32;
+    run.fMask = SEE_MASK_NOCLOSEPROCESS | SEE_MASK_NOASYNC;
+    run.lpVerb = verb.as_ptr();
+    run.lpFile = file.as_ptr();
+    run.lpParameters = args.as_ptr();
+    // SW_SHOWNORMAL: windows' prompt in front
+    run.nShow = 1;
+    log::info!("vigembus: running {}", installer.display());
+    if unsafe { ShellExecuteExW(&mut run) } == 0 {
+        // 1223, ERROR_CANCELLED: windows asked and was told no
+        let e = std::io::Error::last_os_error();
+        log::warn!("vigembus: the installer did not run ({e})");
+        return Err(if e.raw_os_error() == Some(1223) { "declined".into() } else { e.to_string() });
+    }
+    if run.hProcess.is_null() {
+        return Ok(());
+    }
+    let mut code = 0u32;
+    unsafe {
+        WaitForSingleObject(run.hProcess, INFINITE);
+        GetExitCodeProcess(run.hProcess, &mut code);
+        CloseHandle(run.hProcess);
+    }
+    log::info!("vigembus: the installer is done ({code})");
+    // 3010 and 1641: installed, windows wants a restart
+    match code {
+        0 | 3010 | 1641 => Ok(()),
+        _ => Err(format!("the installer stopped with code {code}")),
     }
 }
 

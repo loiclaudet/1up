@@ -1,4 +1,4 @@
-// a nintendo pad with no picture of its own yet (the snes, n64 and genesis pads, the joy-cons): a quiet line drawing
+// a nintendo pad with no picture of its own yet (the n64 and genesis pads, a joy-con alone): a quiet line drawing
 // with each of its controls where a pad usually has it, named as nintendo prints them
 
 import type { Control, Stick } from '../types';

@@ -304,6 +304,18 @@ button {
   background: var(--ink-3);
 }
 
+/* the driver's installer running: a slow breath, the time windows takes */
+.dot.running {
+  background: var(--live-deep);
+  animation: breathe 1.4s var(--out) infinite alternate;
+}
+
+@keyframes breathe {
+  to {
+    opacity: 0.35;
+  }
+}
+
 /* ------------------------------------------------------------------------------------------------- the header */
 
 .main {
@@ -965,7 +977,8 @@ button {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .picker {
+  .picker,
+  .dot.running {
     animation: none;
   }
 

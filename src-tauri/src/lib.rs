@@ -51,6 +51,32 @@ fn details(app: AppHandle, engine: State<'_, Shared>) -> (String, String) {
     (engine::report(&engine.lock().unwrap().view(), &version, &system, &logs), logs)
 }
 
+/// the xbox pads' driver, installed with vigembus's installer that 1up ships (windows: 1up's installer runs it, this
+/// runs it again). `Ok(false)`: no installer here (a build of one's own), the page links to vigembus instead
+#[tauri::command]
+async fn install_driver(app: AppHandle, engine: State<'_, Shared>) -> Result<bool, String> {
+    #[cfg(windows)]
+    {
+        let installer = app
+            .path()
+            .resolve("drivers/vigembus-setup.exe", tauri::path::BaseDirectory::Resource)
+            .map_err(|e| e.to_string())?;
+        if !installer.exists() {
+            return Ok(false);
+        }
+        let done = tauri::async_runtime::spawn_blocking(move || out::install_driver(&installer))
+            .await
+            .map_err(|e| e.to_string())?;
+        engine.lock().unwrap().driver_installed();
+        done.map(|()| true)
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = (app, engine);
+        Ok(false)
+    }
+}
+
 /// the window, shown and in front: the tray's click, a second launch
 fn show(app: &AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
@@ -125,7 +151,11 @@ pub fn run() {
                 sdl::spawn(move |event| from_sdl.lock().unwrap().on(event));
                 thread::spawn(move || loop {
                     thread::sleep(DRAW_EVERY);
-                    let view = engine.lock().unwrap().view_if_changed();
+                    let view = {
+                        let mut engine = engine.lock().unwrap();
+                        engine.tick();
+                        engine.view_if_changed()
+                    };
                     if let (Some(view), Some(channel)) = (view, page.lock().unwrap().as_ref()) {
                         let _ = channel.send(view);
                     }
@@ -134,7 +164,7 @@ pub fn run() {
             }
         })
         .manage(page)
-        .invoke_handler(tauri::generate_handler![subscribe, change, details])
+        .invoke_handler(tauri::generate_handler![subscribe, change, details, install_driver])
         .run(tauri::generate_context!())
         .expect("1up: the app did not start");
 }

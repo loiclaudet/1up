@@ -5,36 +5,82 @@
   </picture>
 </p>
 
-<p align="center"><strong>a free rewasd for nintendo pads on windows</strong></p>
+<h3 align="center">your nintendo pads, in every windows game</h3>
 
 <p align="center">
-  the switch online nes, famicom and snes pads, the switch pro controller and the joy-cons,<br>
-  turned into a virtual xbox 360 pad or into keys, each button's mapping written on a picture of the pad.
+  the switch online nes, famicom and snes pads, the switch pro controller and the joy-cons: windows lists them, but
+  most games and emulators can't read them. 1up turns each one into an xbox pad, the pad every windows game knows.
+  1up is a free alternative to the popular <a href="https://www.rewasd.com/">rewasd</a>, made for nintendo pads, and
+  open source.
 </p>
 
 <p align="center">
-  <a href="https://github.com/loiclaudet/1up/releases/latest"><b>download for windows</b></a>
-  &nbsp;·&nbsp; <a href="#use-it">use it</a>
-  &nbsp;·&nbsp; <a href="#pads">pads</a>
-  &nbsp;·&nbsp; <a href="#develop">develop</a>
+  <a href="https://github.com/loiclaudet/1up/releases/latest/download/1up-setup.exe">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="design/download-dark.svg">
+      <img alt="Download for Windows" src="design/download.svg" width="367">
+    </picture>
+  </a>
 </p>
 
-![1up with a switch pro controller: each button's mapping written beside it, the pressed ones lit](docs/screenshot.png)
+<p align="center">
+  <sub>windows 10 and 11, one installer · <a href="https://github.com/loiclaudet/1up/releases">every version</a></sub>
+</p>
 
-## why
+![1up with a super nintendo pad: what each button sends written beside it, the pressed ones lit](docs/screenshot.png)
 
-windows lists these pads, but most games and emulators can't read them: they speak nintendo's own protocol, not
-xinput. the tool people pay for is rewasd. 1up does that part for free: it talks to each pad the way a switch does,
-and hands games an xbox pad, or keys.
+<p align="center">
+  <a href="https://github.com/loiclaudet/1up/releases/latest/download/1up-setup.exe">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="design/download-dark.svg">
+      <img alt="Download for Windows" src="design/download.svg" width="367">
+    </picture>
+  </a>
+</p>
 
-## what it does
+<p align="center">
+  <sub><code>1up-setup.exe</code> installs 1up and the driver for its xbox pads, nothing else</sub>
+</p>
 
-- **every pad drawn as it is.** press a button and it lights on the picture, with what it sends written beside it.
-- **an xbox 360 pad per nintendo pad**, or keyboard keys (no driver needed), or nothing.
-- **face buttons by position or by label.** by position, nintendo's A is the xbox pad's B, where your thumb is:
-  what games and emulators expect. by label, A stays A.
-- **remap any button.** click it, then pick a target on the xbox pad, or press the key it should type.
-- **set and forget.** one profile per pad, kept between runs. 1up lives in the tray and can start with windows.
+## three steps
+
+1. **install 1up.** [download `1up-setup.exe`](https://github.com/loiclaudet/1up/releases/latest/download/1up-setup.exe)
+   and run it. it installs 1up, then the driver that lets it plug in xbox pads. windows asks you to allow the driver,
+   and names its author: nefarius.
+2. **pair your pad.** windows settings, *bluetooth & devices*, *add device*, *bluetooth*. hold the pad's sync button
+   until its lights blink, then pick it in the list.
+3. **play.** open 1up and press a button: your pad shows up, drawn as it is, lit where you press. your games and
+   emulators now see an xbox pad.
+
+a button should do something else? click it on the picture, then pick a button of the xbox pad, or switch the pad to
+keys and press the key it should type. 1up keeps each pad's setup, and keeps running in the tray when you close it.
+
+## is it safe?
+
+- **it's open source.** every line of 1up is here, under the mit licence, and github builds the installer from it in
+  the open: [the builds](https://github.com/loiclaudet/1up/actions/workflows/ci.yml).
+- **it stays offline.** 1up never goes online. no account, no tracking, no ads.
+- **the driver is vigembus**, by nefarius: open source too, and the one ds4windows and betterjoy use for their xbox
+  pads. nefarius stopped working on it in 2023; its last version, the one 1up installs, runs on windows 10 and 11.
+- **windows warns you the first time.** 1up is new and isn't signed (signing costs money every year), so your
+  browser may say the file isn't commonly downloaded, and windows that it protected your pc. keep the file, then
+  *more info*, *run anyway*.
+- **it uninstalls cleanly.** windows settings, *apps*, 1up. the driver stays, other apps may need it: it has its
+  own entry there, *ViGEm Bus Driver*.
+
+## pads
+
+each one works as an xbox pad or as keys.
+
+| | pad |
+| :---: | --- |
+| <img alt="nes pad" src="docs/pads/nes.svg"> | switch online nes, left and right |
+| <img alt="famicom pad 1" src="docs/pads/famicom1.svg"> | switch online famicom 1 |
+| <img alt="famicom pad 2" src="docs/pads/famicom2.svg"> | switch online famicom 2 |
+| <img alt="snes pad" src="docs/pads/snes.svg"> | switch online snes |
+| <img alt="switch pro controller" src="docs/pads/pro.svg"> | switch pro controller |
+| <img alt="two joy-cons" src="docs/pads/joycons.svg"> | joy-cons, as a pair |
+| <img alt="a pad drawn as a diagram" src="docs/pads/diagram.svg"> | a joy-con alone, the switch online n64 and genesis pads: drawn as a diagram for now |
 
 <table>
   <tr>
@@ -42,70 +88,36 @@ and hands games an xbox pad, or keys.
     <td><img alt="the famicom pad, B and right pressed" src="docs/famicom.png"></td>
   </tr>
   <tr>
-    <td><img alt="two joy-cons, ZL, X and up pressed, the right stick pushed" src="docs/joycons.png"></td>
-    <td><img alt="editing what A sends: the xbox pad's targets in a drawer" src="docs/editing.png"></td>
+    <td><img alt="the joy-cons, ZL, X and up pressed, the right stick pushed" src="docs/joycons.png"></td>
+    <td><img alt="choosing what A sends: the xbox pad's buttons in a drawer" src="docs/editing.png"></td>
   </tr>
 </table>
 
-## use it
+## good to know
 
-1. install [vigembus](https://github.com/nefarius/ViGEmBus/releases/latest), the driver that makes the virtual xbox
-   pads. keys work without it.
-2. pair your pad in windows' bluetooth settings.
-3. open 1up. the pad shows up, drawn as it is: press its buttons and watch them light.
-4. click a button to change what it sends, or switch the whole pad to keys.
-5. close the window: 1up keeps running in the tray. *start with windows* keeps it there from the start.
+- **a game sees two pads?** some apps read nintendo pads themselves (steam with its switch support on, a few
+  emulators), and see 1up's xbox pad too. turn one of them off there.
+- **face buttons.** by default nintendo's A is the xbox pad's B: the button under your thumb, where games expect it.
+  *by label* keeps A as A.
+- **keys don't reach a game?** a game running as administrator ignores keys typed by other apps. run 1up as
+  administrator too, or use the xbox pad, which has no such limit.
+- **a pad misbehaves?** *details*, top right in 1up, has a report: paste it in
+  [an issue](https://github.com/loiclaudet/1up/issues).
+- **on a mac?** 1up is for windows.
 
-## pads
+## thanks
 
-| pad | read | drawn |
-| --- | :---: | :---: |
-| switch online nes (l and r) | ✓ | ✓ |
-| switch online famicom (1 and 2) | ✓ | ✓ |
-| switch online snes | ✓ | ✓ |
-| switch pro controller | ✓ | ✓ |
-| joy-cons, paired | ✓ | ✓ |
-| a joy-con alone | ✓ | schematic |
-| switch online n64 and genesis | ✓ | schematic |
+- [SDL](https://libsdl.org) reads the pads (zlib licence).
+- [vigembus](https://github.com/nefarius/ViGEmBus), by nefarius, makes the xbox pads (bsd 3-clause licence, which
+  ships with 1up), through [vigem-client](https://github.com/CasualX/vigem-client) (mit).
+- Darker Grotesque and Onest, the fonts (sil open font licence).
 
-## known limits
-
-- a game that also reads the nintendo pad itself (steam with its switch support on, an sdl based emulator) sees it
-  twice: once as itself, once as 1up's xbox pad. turn one of them off there.
-- a game running as administrator ignores the keys 1up types (windows keeps a normal app's keystrokes out of it):
-  run 1up as administrator too, or use the xbox pad, which has no such limit.
-- windows may warn about an unknown publisher: 1up isn't signed. *more info*, then *run anyway*.
-- a pad misbehaving? *details* (top right) has a report to copy into an issue.
-
-## develop
-
-```bash
-pnpm install
-pnpm tauri dev                                    # the app, live reload (a mac shows the outputs as a preview)
-pnpm dev                                          # the interface alone in a browser, on a demo with fake pads
-pnpm test                                         # the page's tests (vitest)
-cargo test --manifest-path src-tauri/Cargo.toml   # the rust side's
-```
-
-building from source needs cmake: SDL 3 is built in and linked statically. ci (`.github/workflows/ci.yml`) runs
-both test suites on windows and on a mac, checks a virtual pad on a real vigembus, builds the windows app and starts
-it once: the installer and a portable exe come out as an artifact. a `v*` tag turns them into a draft release.
-
-how it is made: SDL reads the pads on its own thread with only its nintendo drivers on (`src-tauri/src/sdl.rs`),
-the engine maps them (`engine.rs`, `mapping.rs`), vigembus and `SendInput` send them (`out.rs`, `keys.rs`), and the
-page draws a view of it (`src/`). the logo is generated by `design/logo.py`; the design's reasons are in
-`.impeccable.md`.
-
-## credits
-
-- [SDL](https://libsdl.org) (zlib) reads the pads.
-- [vigem-client](https://github.com/CasualX/vigem-client) (mit) talks to [vigembus](https://github.com/nefarius/ViGEmBus)
-  (bsd 3-clause, by nefarius).
-- Darker Grotesque and Onest (sil open font licence).
+want to build 1up or help? see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 1up is not affiliated with, endorsed or sponsored by Nintendo. Nintendo, Nintendo Switch, Joy-Con, Nintendo
 Entertainment System, Super Nintendo Entertainment System and Family Computer are trademarks of Nintendo; they are
-named here only to say which pads 1up works with. the pads are drawn by 1up and carry no logo.
+named here only to say which pads 1up works with. the pads are drawn by 1up and carry no logo. Xbox and Windows are
+trademarks of Microsoft. reWASD is a trademark of its owner, and 1up is not affiliated with it.
 
 ## licence
 
