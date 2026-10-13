@@ -1,9 +1,11 @@
 import type { Family } from '../types';
 import { FAMICOM1, FAMICOM2 } from './famicom';
+import { JOYCONS } from './joycons';
 import { NES } from './nes';
 import { PRO } from './pro';
 import type { PadArt } from './props';
 import { SCHEMATIC } from './schematic';
+import { SNES } from './snes';
 
 export type { PadArt, PadPictureProps, Part } from './props';
 
@@ -16,8 +18,12 @@ export function artOf(family: Family): PadArt {
       return FAMICOM1;
     case 'famicom2':
       return FAMICOM2;
+    case 'snes':
+      return SNES;
     case 'switch_pro':
       return PRO;
+    case 'joy_con_pair':
+      return JOYCONS;
     default:
       return SCHEMATIC;
   }

@@ -19,12 +19,15 @@ with each button's mapping written on a picture of the pad.
 5. close the window: 1up keeps running in the tray. *start with windows* keeps it there from the start.
 
 1up reads the switch online nes, famicom, snes, n64 and genesis pads, the switch pro controller, and the joy-cons
-alone or paired. the nes, famicom and switch pro pads are drawn; the others show a schematic for now.
+alone or paired. all of them are drawn but the n64 and genesis pads and a lone joy-con, which show a schematic for
+now.
 
 ## known limits
 
 - a game that also reads the nintendo pad itself (steam with its switch support on, an sdl based emulator) sees it
   twice: once as itself, once as 1up's xbox pad. turn one of them off there.
+- a game running as administrator ignores the keys 1up types (windows keeps a normal app's keystrokes out of it):
+  run 1up as administrator too, or use the xbox pad, which has no such limit.
 - windows may warn about an unknown publisher: 1up isn't signed. *more info*, then *run anyway*.
 - a pad misbehaving? *details* (top right) has a report to copy into an issue.
 
