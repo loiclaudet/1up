@@ -48,6 +48,9 @@ pub struct Info {
     pub product: u16,
     pub guid: String,
     pub mapping: String,
+    /// the label SDL gives each face position, south, east, west, north (SDL_GamepadButtonLabel): a switch pad's
+    /// by position, B A Y X; a switch online classic's by label, A B X Y
+    pub faces: [i32; 4],
 }
 
 /// starts SDL on a thread of its own; `on` gets every event, in order, on that thread
@@ -87,6 +90,7 @@ unsafe fn run(on: &mut impl FnMut(Event)) {
                 let mut guid = [0 as c_char; 33];
                 SDL_GUIDToString(SDL_GetGamepadGUIDForID(id), guid.as_mut_ptr(), guid.len() as i32);
                 let mapping = SDL_GetGamepadMapping(pad);
+                let faces = [0, 1, 2, 3].map(|b| SDL_GetGamepadButtonLabel(pad, SDL_GamepadButton(b)).0);
                 let info = Info {
                     id: id.0,
                     name: text(SDL_GetGamepadName(pad)),
@@ -95,6 +99,7 @@ unsafe fn run(on: &mut impl FnMut(Event)) {
                     product: SDL_GetGamepadProduct(pad),
                     guid: text(guid.as_ptr()),
                     mapping: text(mapping),
+                    faces,
                 };
                 SDL_free(mapping.cast());
                 on(Event::Added(info));
