@@ -81,11 +81,11 @@ function DriverNote({ driver }: { driver: Driver }) {
         <>Installed. If Xbox pads don’t come, restart Windows.</>
       ) : (
         <>
-          {install === 'failed' ? 'The driver didn’t install. ' : 'Xbox pads need a driver. '}
+          {install === 'failed' ? 'The driver didn’t install.' : 'Xbox pads need a driver.'} Keys work without
+          it.{' '}
           <button type="button" className="link" onClick={run}>
             {install === 'failed' ? 'Try again' : 'Install it'}
           </button>
-          . Keys work without it.
         </>
       )}
     </p>
