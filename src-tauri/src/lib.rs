@@ -19,7 +19,9 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 use tauri::ipc::Channel;
-use tauri::{Manager, State};
+use tauri::menu::{Menu, MenuItem};
+use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
+use tauri::{AppHandle, Manager, State, WindowEvent};
 
 type Shared = Arc<Mutex<Engine>>;
 type Page = Arc<Mutex<Option<Channel<View>>>>;
@@ -40,14 +42,72 @@ fn change(engine: State<'_, Shared>, pad: u32, change: Change) -> Result<(), Str
     engine.lock().unwrap().change(pad, change)
 }
 
+/// the text to paste in a bug report, and the folder of the log file
+#[tauri::command]
+fn details(app: AppHandle, engine: State<'_, Shared>) -> (String, String) {
+    let logs = app.path().app_log_dir().map(|d| d.display().to_string()).unwrap_or_default();
+    let system = format!("{} {}", std::env::consts::OS, std::env::consts::ARCH);
+    let version = app.package_info().version.to_string();
+    (engine::report(&engine.lock().unwrap().view(), &version, &system, &logs), logs)
+}
+
+/// the window, shown and in front: the tray's click, a second launch
+fn show(app: &AppHandle) {
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.unminimize();
+        let _ = window.show();
+        let _ = window.set_focus();
+    }
+}
+
+/// started by windows at login (`--hidden`, see the autostart plugin): straight to the tray
+const HIDDEN: &str = "--hidden";
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let page: Page = Arc::default();
     tauri::Builder::default()
+        // first: a second 1up shows this one and quits
+        .plugin(tauri_plugin_single_instance::init(|app, _, _| show(app)))
         .plugin(tauri_plugin_log::Builder::default().level(log::LevelFilter::Info).build())
+        .plugin(tauri_plugin_autostart::init(tauri_plugin_autostart::MacosLauncher::LaunchAgent, Some(vec![HIDDEN])))
+        .plugin(tauri_plugin_opener::init())
+        .on_window_event(|window, event| {
+            // closing keeps 1up running in the tray: the pads keep working while a game plays
+            if let WindowEvent::CloseRequested { api, .. } = event {
+                api.prevent_close();
+                let _ = window.hide();
+            }
+        })
         .setup({
             let page = page.clone();
             move |app| {
+                let shown = MenuItem::with_id(app, "show", "Show 1up", true, None::<&str>)?;
+                let quit = MenuItem::with_id(app, "quit", "Quit 1up", true, None::<&str>)?;
+                let mut tray = TrayIconBuilder::with_id("1up")
+                    .tooltip("1up")
+                    .menu(&Menu::with_items(app, &[&shown, &quit])?)
+                    .show_menu_on_left_click(false)
+                    .on_menu_event(|app, event| match event.id.as_ref() {
+                        "show" => show(app),
+                        "quit" => app.exit(0),
+                        _ => {}
+                    })
+                    .on_tray_icon_event(|tray, event| {
+                        if let TrayIconEvent::Click { button: MouseButton::Left, button_state: MouseButtonState::Up, .. } = event {
+                            show(tray.app_handle());
+                        }
+                    });
+                if let Some(icon) = app.default_window_icon() {
+                    tray = tray.icon(icon.clone());
+                }
+                tray.build(app)?;
+                if let Some(window) = app.get_webview_window("main")
+                    && std::env::args().any(|a| a == HIDDEN)
+                {
+                    let _ = window.hide();
+                }
+
                 let store = match app.path().app_config_dir() {
                     Ok(dir) => profiles::Store::load(dir.join("profiles.json")),
                     Err(_) => profiles::Store::memory(),
@@ -74,7 +134,7 @@ pub fn run() {
             }
         })
         .manage(page)
-        .invoke_handler(tauri::generate_handler![subscribe, change])
+        .invoke_handler(tauri::generate_handler![subscribe, change, details])
         .run(tauri::generate_context!())
         .expect("1up: the app did not start");
 }

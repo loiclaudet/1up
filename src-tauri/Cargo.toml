@@ -19,9 +19,12 @@ tauri-build = { version = "2.7.2" }
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 log = "0.4"
-tauri = { version = "2.12.3" }
+tauri = { version = "2", features = ["tray-icon"] }
 tauri-plugin-log = "2"
 sdl3-sys = { version = "0.7", default-features = false, features = ["build-from-source-static", "no-default-subsystems", "sdl-joystick", "sdl-hidapi"] }
+tauri-plugin-single-instance = "2"
+tauri-plugin-autostart = "2"
+tauri-plugin-opener = "2"
 
 [target."cfg(windows)".dependencies]
 vigem-client = "0.1.4"

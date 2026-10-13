@@ -179,6 +179,42 @@ impl Engine {
     }
 }
 
+/// what someone reports when a pad misbehaves: 1up's version, the system, the driver, every pad as SDL sees it
+/// and what it holds and sends now. plain text, to paste anywhere
+pub fn report(view: &View, version: &str, system: &str, logs: &str) -> String {
+    let driver = match view.driver {
+        Driver::Ready => "vigembus ready",
+        Driver::Missing => "vigembus missing",
+        Driver::Preview => "preview (not windows)",
+    };
+    let mut out = format!("1up {version} · {system} · {driver}\nlogs: {logs}\n");
+    if view.pads.is_empty() {
+        out.push_str("no pad\n");
+    }
+    for pad in &view.pads {
+        let p = &pad.profile;
+        let held: Vec<String> = pad.held.controls.iter().map(|c| c.to_string()).collect();
+        out.push_str(&format!(
+            "\n{} · {:?} · sdl type {} · {:04x}:{:04x}\n  guid {}\n  output {:?}{} · preset {:?}\n  holds {} · left {:?} right {:?}\n  sends {}\n  mapping {}\n",
+            pad.name,
+            pad.family,
+            pad.kind,
+            pad.vendor,
+            pad.product,
+            pad.guid,
+            p.output,
+            pad.slot.map(|s| format!(" (xbox pad {s})")).unwrap_or_default(),
+            p.preset,
+            if held.is_empty() { "nothing".into() } else { held.join(" ") },
+            pad.held.left,
+            pad.held.right,
+            serde_json::to_string(&pad.out).unwrap_or_default(),
+            if pad.mapping.is_empty() { "-" } else { &pad.mapping },
+        ));
+    }
+    out
+}
+
 fn set<K: Ord, V>(map: &mut BTreeMap<K, V>, key: K, value: Option<V>) {
     match value {
         Some(v) => map.insert(key, v),
@@ -322,6 +358,20 @@ mod tests {
         assert_eq!(json["pads"][0]["family"], "nes");
         assert_eq!(json["pads"][0]["held"]["controls"][0], "up");
         assert_eq!(json["driver"], "ready");
+    }
+
+    #[test]
+    fn a_report_names_the_version_the_driver_and_each_pad() {
+        let (mut one, _) = engine();
+        one.on(nes(4));
+        one.on(Event::Button { id: 4, button: 0, down: true });
+        let text = report(&one.view(), "0.1.0", "windows", "C:/logs");
+        assert!(text.starts_with("1up 0.1.0 · windows · vigembus ready\nlogs: C:/logs\n"));
+        assert!(text.contains("Nintendo NES Controller (L) · Nes · sdl type standard · 057e:2007"));
+        assert!(text.contains("output Xbox (xbox pad 1) · preset Position"));
+        assert!(text.contains("holds a"));
+        let (empty, _) = engine();
+        assert!(report(&empty.view(), "0.1.0", "macos", "/logs").contains("no pad"));
     }
 
     #[test]

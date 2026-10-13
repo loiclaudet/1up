@@ -1,5 +1,7 @@
 // the rail: the pads plugged in, each drawn small, with where it goes; vigembus's state at the bottom
 
+import { useEffect, useState } from 'react';
+import { openLink, startup } from '../api';
 import { artOf } from '../pictures';
 import { padName } from '../labels';
 import type { Driver, PadView } from '../types';
@@ -14,6 +16,30 @@ export function destination(pad: PadView, driver: Driver): string {
       if (pad.slot) return `Xbox pad ${pad.slot}`;
       return driver === 'missing' ? 'Needs ViGEmBus' : driver === 'preview' ? 'Xbox pad, on Windows' : 'Xbox pad';
   }
+}
+
+/// start 1up with windows, in the tray: the pads ready before any game
+function StartWithWindows() {
+  const [on, setOn] = useState<boolean | null>(null);
+  useEffect(() => {
+    startup.get().then(setOn, () => setOn(false));
+  }, []);
+  return (
+    <label className="switch">
+      <input
+        type="checkbox"
+        checked={on ?? false}
+        disabled={on === null}
+        onChange={(e) => {
+          const next = e.target.checked;
+          setOn(next);
+          startup.set(next).catch(() => setOn(!next));
+        }}
+      />
+      <span className="switch-track" aria-hidden />
+      <span>Start with Windows</span>
+    </label>
+  );
 }
 
 export function Rail({
@@ -60,6 +86,7 @@ export function Rail({
         {pads.length === 0 && <li className="pad-list-empty">No pad yet</li>}
       </ul>
       <footer className="driver">
+        <StartWithWindows />
         {driver === 'ready' && (
           <p>
             <span className="dot ready" /> Xbox pads ready
@@ -68,9 +95,9 @@ export function Rail({
         {driver === 'missing' && (
           <p>
             <span className="dot missing" /> Xbox pads need{' '}
-            <a href="https://github.com/nefarius/ViGEmBus/releases/latest" target="_blank" rel="noreferrer">
+            <button type="button" className="link" onClick={() => openLink('https://github.com/nefarius/ViGEmBus/releases/latest')}>
               ViGEmBus
-            </a>
+            </button>
             . Keys work without it.
           </p>
         )}

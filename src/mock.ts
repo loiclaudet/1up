@@ -88,6 +88,19 @@ export function change(id: number, c: Change) {
   emit();
 }
 
+/// the demo's report, shaped as the app's
+export function report(): string {
+  const lines = view.pads.map(
+    (p) =>
+      `\n${p.name} · ${p.family} · sdl type ${p.kind} · ${p.vendor.toString(16).padStart(4, '0')}:${p.product.toString(16).padStart(4, '0')}\n` +
+      `  guid ${p.guid}\n  output ${p.profile.output} · preset ${p.profile.preset}\n  holds ${p.held.controls.join(' ') || 'nothing'}`,
+  );
+  return `1up demo · ${navigator.platform} · preview\n${lines.join('\n')}\n`;
+}
+
+/// the demo's login item
+export const startup = { on: false };
+
 /// the demo's presses from the page's own keyboard and clicks: a control held while the pointer is down on it
 export function hold(id: number, control: Control, down: boolean) {
   const p = view.pads.find((p) => p.id === id);
