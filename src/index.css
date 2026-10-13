@@ -120,10 +120,21 @@ button {
   padding: 0 10px;
 }
 
-.wordmark {
-  font: 800 46px/0.85 var(--display);
-  letter-spacing: -0.02em;
-  color: var(--ink);
+.logo {
+  display: block;
+  overflow: visible;
+}
+
+.logo-ink {
+  fill: var(--ink);
+}
+
+.logo-live {
+  fill: var(--live);
+}
+
+.logo-engraved {
+  fill: var(--ink-3);
 }
 
 .rail-title {
