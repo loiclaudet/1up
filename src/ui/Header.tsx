@@ -16,7 +16,17 @@ const PRESETS: [Preset, string, string][] = [
   ['label', 'By label', 'Face buttons by label: A is A and B is B, as printed, wherever they sit.'],
 ];
 
-export function Header({ pad, driver, onChange }: { pad: PadView; driver: Driver; onChange: (c: Change) => void }) {
+export function Header({
+  pad,
+  driver,
+  onChange,
+  onDetails,
+}: {
+  pad: PadView;
+  driver: Driver;
+  onChange: (c: Change) => void;
+  onDetails: () => void;
+}) {
   const { output, preset } = pad.profile;
   const hasFace = pad.controls.includes('a');
   return (
@@ -63,6 +73,9 @@ export function Header({ pad, driver, onChange }: { pad: PadView; driver: Driver
         )}
         <button type="button" className="ghost reset" onClick={() => onChange({ do: 'reset' })}>
           Reset
+        </button>
+        <button type="button" className="ghost" onClick={onDetails}>
+          Details
         </button>
       </div>
     </header>
