@@ -8,9 +8,10 @@
 <h3 align="center">your nintendo pads, in every windows game</h3>
 
 <p align="center">
-  the switch online nes, famicom and snes pads, the switch pro controller and the joy-cons: windows lists them,<br>
-  but most games and emulators can't read them. 1up turns each one into an xbox pad, the pad every windows game knows.<br>
-  1up is a free alternative to the popular <a href="https://www.rewasd.com/">rewasd</a>, made for nintendo pads, and open source.
+  the switch online nes, famicom and snes pads, the switch pro controller and the joy-cons: windows lists them, but
+  most games and emulators can't read them. 1up turns each one into an xbox pad, the pad every windows game knows.
+  1up is a free alternative to the popular <a href="https://www.rewasd.com/">rewasd</a>, made for nintendo pads, and
+  open source.
 </p>
 
 <p align="center">
@@ -73,13 +74,13 @@ each one works as an xbox pad or as keys.
 
 | | pad |
 | :---: | --- |
-| <img alt="nes pad" src="docs/pads/nes.svg" height="44"> | switch online nes, left and right |
-| <img alt="famicom pad 1" src="docs/pads/famicom1.svg" height="44"> | switch online famicom 1 |
-| <img alt="famicom pad 2" src="docs/pads/famicom2.svg" height="44"> | switch online famicom 2 |
-| <img alt="snes pad" src="docs/pads/snes.svg" height="44"> | switch online snes |
-| <img alt="switch pro controller" src="docs/pads/pro.svg" height="44"> | switch pro controller |
-| <img alt="two joy-cons" src="docs/pads/joycons.svg" height="44"> | joy-cons, as a pair |
-| <img alt="a pad drawn as a diagram" src="docs/pads/diagram.svg" height="44"> | a joy-con alone, the switch online n64 and genesis pads: drawn as a diagram for now |
+| <img alt="nes pad" src="docs/pads/nes.svg"> | switch online nes, left and right |
+| <img alt="famicom pad 1" src="docs/pads/famicom1.svg"> | switch online famicom 1 |
+| <img alt="famicom pad 2" src="docs/pads/famicom2.svg"> | switch online famicom 2 |
+| <img alt="snes pad" src="docs/pads/snes.svg"> | switch online snes |
+| <img alt="switch pro controller" src="docs/pads/pro.svg"> | switch pro controller |
+| <img alt="two joy-cons" src="docs/pads/joycons.svg"> | joy-cons, as a pair |
+| <img alt="a pad drawn as a diagram" src="docs/pads/diagram.svg"> | a joy-con alone, the switch online n64 and genesis pads: drawn as a diagram for now |
 
 <table>
   <tr>

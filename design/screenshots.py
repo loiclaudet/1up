@@ -79,6 +79,8 @@ SHADOW = (
     '<feDropShadow dx="0" dy="12" stdDeviation="9" flood-color="#191c12" flood-opacity="0.18"/></filter>'
 )
 ROOM = 30
+# each small picture's own height, in px: github shrinks a picture with no size of its own to nothing in a table
+TALL = 48
 
 
 def pictures():
@@ -98,8 +100,9 @@ def pictures():
         inner = re.sub(r'<(rect|circle|path|ellipse)[^>]*class="ring"[^>]*/?>(</\1>)?', '', inner)
         schematic = ' class="schematic"' if 'schematic' in svg[: svg.index('>')] else ''
         box = f'{x - ROOM} {y - ROOM} {w + 2 * ROOM} {h + 2 * ROOM}'
+        wide = TALL * (w + 2 * ROOM) / (h + 2 * ROOM)
         (out / f'{name}.svg').write_text(
-            f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{box}"{schematic}>'
+            f'<svg xmlns="http://www.w3.org/2000/svg" width="{wide:.0f}" height="{TALL}" viewBox="{box}"{schematic}>'
             f'<defs><style>{STYLE}</style>{SHADOW}</defs><g filter="url(#shade)">{inner}</g></svg>\n'
         )
         print(f'docs/pads/{name}.svg')
