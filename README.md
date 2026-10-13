@@ -1,26 +1,72 @@
-# 1up
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="design/logo-dark.svg">
+    <img alt="1up" src="design/logo.svg" width="280">
+  </picture>
+</p>
 
-a free rewasd for nintendo pads on windows.
+<p align="center"><strong>a free rewasd for nintendo pads on windows</strong></p>
 
-windows lists the switch online nes and famicom pads, the switch pro controller and the joy-cons, but most games
-and emulators can't read them. 1up reads them and turns each into a virtual xbox 360 pad, or into keyboard keys,
-with each button's mapping written on a picture of the pad.
+<p align="center">
+  the switch online nes, famicom and snes pads, the switch pro controller and the joy-cons,<br>
+  turned into a virtual xbox 360 pad or into keys, each button's mapping written on a picture of the pad.
+</p>
 
-![1up with a switch pro controller: each button's mapping written beside it](docs/screenshot.png)
+<p align="center">
+  <a href="https://github.com/loiclaudet/1up/releases/latest"><b>download for windows</b></a>
+  &nbsp;·&nbsp; <a href="#use-it">use it</a>
+  &nbsp;·&nbsp; <a href="#pads">pads</a>
+  &nbsp;·&nbsp; <a href="#develop">develop</a>
+</p>
+
+![1up with a switch pro controller: each button's mapping written beside it, the pressed ones lit](docs/screenshot.png)
+
+## why
+
+windows lists these pads, but most games and emulators can't read them: they speak nintendo's own protocol, not
+xinput. the tool people pay for is rewasd. 1up does that part for free: it talks to each pad the way a switch does,
+and hands games an xbox pad, or keys.
+
+## what it does
+
+- **every pad drawn as it is.** press a button and it lights on the picture, with what it sends written beside it.
+- **an xbox 360 pad per nintendo pad**, or keyboard keys (no driver needed), or nothing.
+- **face buttons by position or by label.** by position, nintendo's A is the xbox pad's B, where your thumb is:
+  what games and emulators expect. by label, A stays A.
+- **remap any button.** click it, then pick a target on the xbox pad, or press the key it should type.
+- **set and forget.** one profile per pad, kept between runs. 1up lives in the tray and can start with windows.
+
+<table>
+  <tr>
+    <td><img alt="the nes pad, A and up pressed" src="docs/nes.png"></td>
+    <td><img alt="the famicom pad, B and right pressed" src="docs/famicom.png"></td>
+  </tr>
+  <tr>
+    <td><img alt="two joy-cons, ZL, X and up pressed, the right stick pushed" src="docs/joycons.png"></td>
+    <td><img alt="editing what A sends: the xbox pad's targets in a drawer" src="docs/editing.png"></td>
+  </tr>
+</table>
 
 ## use it
 
 1. install [vigembus](https://github.com/nefarius/ViGEmBus/releases/latest), the driver that makes the virtual xbox
    pads. keys work without it.
 2. pair your pad in windows' bluetooth settings.
-3. open 1up. the pad shows up, drawn as it is; press its buttons and each one lights, with what it sends.
-4. click a button to change what it sends. *by position*, the default, puts nintendo's A where an xbox pad has its
-   B, as most games and emulators expect. *by label* keeps A as A.
+3. open 1up. the pad shows up, drawn as it is: press its buttons and watch them light.
+4. click a button to change what it sends, or switch the whole pad to keys.
 5. close the window: 1up keeps running in the tray. *start with windows* keeps it there from the start.
 
-1up reads the switch online nes, famicom, snes, n64 and genesis pads, the switch pro controller, and the joy-cons
-alone or paired. all of them are drawn but the n64 and genesis pads and a lone joy-con, which show a schematic for
-now.
+## pads
+
+| pad | read | drawn |
+| --- | :---: | :---: |
+| switch online nes (l and r) | ✓ | ✓ |
+| switch online famicom (1 and 2) | ✓ | ✓ |
+| switch online snes | ✓ | ✓ |
+| switch pro controller | ✓ | ✓ |
+| joy-cons, paired | ✓ | ✓ |
+| a joy-con alone | ✓ | schematic |
+| switch online n64 and genesis | ✓ | schematic |
 
 ## known limits
 
@@ -42,12 +88,13 @@ cargo test --manifest-path src-tauri/Cargo.toml   # the rust side's
 ```
 
 building from source needs cmake: SDL 3 is built in and linked statically. ci (`.github/workflows/ci.yml`) runs
-both test suites on windows and on a mac, checks a virtual pad on a real vigembus, and builds the windows app: the
-installer and a portable exe. a `v*` tag turns them into a draft release.
+both test suites on windows and on a mac, checks a virtual pad on a real vigembus, builds the windows app and starts
+it once: the installer and a portable exe come out as an artifact. a `v*` tag turns them into a draft release.
 
 how it is made: SDL reads the pads on its own thread with only its nintendo drivers on (`src-tauri/src/sdl.rs`),
 the engine maps them (`engine.rs`, `mapping.rs`), vigembus and `SendInput` send them (`out.rs`, `keys.rs`), and the
-page draws a view of it (`src/`). the design's reasons are in `.impeccable.md`.
+page draws a view of it (`src/`). the logo is generated by `design/logo.py`; the design's reasons are in
+`.impeccable.md`.
 
 ## credits
 
@@ -57,8 +104,8 @@ page draws a view of it (`src/`). the design's reasons are in `.impeccable.md`.
 - Darker Grotesque and Onest (sil open font licence).
 
 1up is not affiliated with, endorsed or sponsored by Nintendo. Nintendo, Nintendo Switch, Joy-Con, Nintendo
-Entertainment System and Family Computer are trademarks of Nintendo; they are named here only to say which pads
-1up works with. the pads are drawn by 1up and carry no logo.
+Entertainment System, Super Nintendo Entertainment System and Family Computer are trademarks of Nintendo; they are
+named here only to say which pads 1up works with. the pads are drawn by 1up and carry no logo.
 
 ## licence
 

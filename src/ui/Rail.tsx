@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { openLink, startup } from '../api';
 import { artOf } from '../pictures';
 import { padName } from '../labels';
+import { Logo } from './Logo';
 import type { Driver, PadView } from '../types';
 
 export function destination(pad: PadView, driver: Driver): string {
@@ -56,7 +57,7 @@ export function Rail({
   return (
     <nav className="rail" aria-label="pads">
       <div className="brand">
-        <span className="wordmark">1up</span>
+        <Logo height={44} />
       </div>
       <p className="eyebrow rail-title">Pads</p>
       <ul className="pad-list">
