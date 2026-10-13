@@ -5,11 +5,16 @@
 pub mod controls;
 pub mod engine;
 pub mod family;
+pub mod keys;
 pub mod mapping;
+#[cfg(windows)]
+pub mod out;
 pub mod profiles;
 pub mod sdl;
 
-use engine::{Change, Engine, Preview, View};
+use engine::{Change, Engine, View};
+#[cfg(not(windows))]
+use engine::Preview;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -47,7 +52,14 @@ pub fn run() {
                     Ok(dir) => profiles::Store::load(dir.join("profiles.json")),
                     Err(_) => profiles::Store::memory(),
                 };
-                let engine: Shared = Arc::new(Mutex::new(Engine::new(store, Box::new(Preview))));
+                #[cfg(windows)]
+                let sink: Box<dyn engine::Sink> = {
+                    out::hold_mutex();
+                    Box::new(out::Windows::new())
+                };
+                #[cfg(not(windows))]
+                let sink: Box<dyn engine::Sink> = Box::new(Preview);
+                let engine: Shared = Arc::new(Mutex::new(Engine::new(store, sink)));
                 app.manage(engine.clone());
                 let from_sdl = engine.clone();
                 sdl::spawn(move |event| from_sdl.lock().unwrap().on(event));
