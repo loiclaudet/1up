@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "1up",
   "mainBinaryName": "1up",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "identifier": "com.loiclaudet.oneup",
   "build": {
     "frontendDist": "../dist",
@@ -42,5 +42,16 @@
     "publisher": "Loïc Laudet",
     "homepage": "https://github.com/loiclaudet/1up",
     "copyright": "MIT, Loïc Laudet"
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDkyMzAzRjVGRUUwRDk1OTcKUldTWGxRM3VYejh3a2lTTGFoUlhkaG1qVWE2dlVYb0hLUzU1ZzVUR1l0bEdlc3JMc3hBVFhHcmsK",
+      "endpoints": [
+        "https://github.com/loiclaudet/1up/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }

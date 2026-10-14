@@ -33,12 +33,33 @@ jobs:
       - run: ./src-tauri/windows/fetch-driver.ps1
         shell: pwsh
       - run: cargo test --manifest-path src-tauri/Cargo.toml
-      - run: pnpm tauri build --bundles nsis
+      # with the update key (the repo secret), the installer is signed for 1up's updater; without it (a fork's pull
+      # request) it is built the same, unsigned
+      - name: build
+        shell: bash
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          if [ -n "$TAURI_SIGNING_PRIVATE_KEY" ]; then
+            pnpm tauri build --bundles nsis --config '{"bundle":{"createUpdaterArtifacts":true}}'
+          else
+            pnpm tauri build --bundles nsis
+          fi
+      # a tag's release also carries latest.json, what every installed 1up asks at launch: the version, and where
+      # the signed installer is
       - name: gather
         shell: bash
         run: |
           mkdir out
           cp src-tauri/target/release/bundle/nsis/*-setup.exe out/1up-setup.exe
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            sig=$(cat src-tauri/target/release/bundle/nsis/*-setup.exe.sig)
+            jq -n --arg version "${GITHUB_REF_NAME#v}" --arg date "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg signature "$sig" \
+              --arg url "https://github.com/$GITHUB_REPOSITORY/releases/download/$GITHUB_REF_NAME/1up-setup.exe" \
+              '{version: $version, notes: "", pub_date: $date, platforms: {"windows-x86_64": {signature: $signature, url: $url}}}' \
+              > out/latest.json
+            cat out/latest.json
+          fi
           ls -la out
       - uses: actions/upload-artifact@v7
         with:

@@ -1,7 +1,7 @@
 {
   "name": "1up",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "packageManager": "pnpm@10.29.3",
   "scripts": {
@@ -17,6 +17,8 @@
     "@tauri-apps/api": "^2.12.3",
     "@tauri-apps/plugin-autostart": "^2.7.0",
     "@tauri-apps/plugin-opener": "^2.7.1",
+    "@tauri-apps/plugin-process": "^2.4.0",
+    "@tauri-apps/plugin-updater": "^2.13.3",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },

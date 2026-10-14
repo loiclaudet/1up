@@ -1,6 +1,6 @@
 [package]
 name = "oneup"
-version = "0.1.0"
+version = "0.1.1"
 description = "1up: turns nintendo pads into xbox pads on windows"
 authors = ["Loïc Laudet"]
 license = "MIT"
@@ -25,6 +25,8 @@ sdl3-sys = { version = "0.7", default-features = false, features = ["build-from-
 tauri-plugin-single-instance = "2"
 tauri-plugin-autostart = "2"
 tauri-plugin-opener = "2"
+tauri-plugin-updater = "2"
+tauri-plugin-process = "2"
 
 [target."cfg(windows)".dependencies]
 vigem-client = "0.1.4"

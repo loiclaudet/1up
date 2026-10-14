@@ -46,7 +46,8 @@ keys and press the key it should type. 1up keeps each pad's setup, and keeps run
 
 - **it's open source.** every line of 1up is here, under the mit licence, and github builds the installer from it in
   the open: [the builds](https://github.com/loiclaudet/1up/actions/workflows/ci.yml).
-- **it stays offline.** 1up never goes online. no account, no tracking, no ads.
+- **it barely goes online.** when it starts, 1up asks github if there's a newer version, and that's all. no account,
+  no tracking, no ads.
 - **the driver is vigembus**, by nefarius: open source too, and the one ds4windows and betterjoy use for their xbox
   pads. nefarius stopped working on it in 2023; its last version, the one 1up installs, runs on windows 10 and 11.
 - **windows warns you the first time.** 1up is new and isn't signed (signing costs money every year), so your
@@ -88,6 +89,8 @@ each one works as an xbox pad or as keys.
   *by label* keeps A as A.
 - **keys don't reach a game?** a game running as administrator ignores keys typed by other apps. run 1up as
   administrator too, or use the xbox pad, which has no such limit.
+- **updates.** when a newer 1up is out, *update* shows at the bottom left. one click installs it, and 1up opens again
+  on its own.
 - **a pad misbehaves?** *details*, top right in 1up, has a report: paste it in
   [an issue](https://github.com/loiclaudet/1up/issues).
 - **on a mac?** 1up is for windows.

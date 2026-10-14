@@ -98,6 +98,9 @@ pub fn run() {
         .plugin(tauri_plugin_log::Builder::default().level(log::LevelFilter::Info).build())
         .plugin(tauri_plugin_autostart::init(tauri_plugin_autostart::MacosLauncher::LaunchAgent, Some(vec![HIDDEN])))
         .plugin(tauri_plugin_opener::init())
+        // the page asks at launch whether a newer 1up is out (github's latest.json), and installs it on a click
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .on_window_event(|window, event| {
             // closing keeps 1up running in the tray: the pads keep working while a game plays
             if let WindowEvent::CloseRequested { api, .. } = event {

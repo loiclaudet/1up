@@ -221,6 +221,12 @@ button {
   margin: 0;
 }
 
+/* a newer 1up: above the rest, set apart */
+.driver .update {
+  margin-bottom: 12px;
+  color: var(--ink);
+}
+
 .link {
   padding: 0;
   color: var(--ink);

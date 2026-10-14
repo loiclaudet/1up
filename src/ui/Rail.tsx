@@ -1,7 +1,8 @@
-// the rail: the pads plugged in, each drawn small, with where it goes; the xbox pads' driver at the bottom
+// the rail: the pads plugged in, each drawn small, with where it goes; at the bottom a newer 1up when one is out, and
+// the xbox pads' driver
 
 import { useEffect, useState } from 'react';
-import { installDriver, openLink, startup } from '../api';
+import { installDriver, openLink, startup, type Update } from '../api';
 import { artOf } from '../pictures';
 import { padName } from '../labels';
 import { Logo } from './Logo';
@@ -92,14 +93,45 @@ function DriverNote({ driver }: { driver: Driver }) {
   );
 }
 
+/// a newer 1up: one click downloads it, and its installer replaces this one and opens it again
+function UpdateNote({ update }: { update: Update }) {
+  const [state, setState] = useState<'idle' | 'running' | 'failed'>('idle');
+  if (state === 'running')
+    return (
+      <p className="update" aria-live="polite">
+        <span className="dot running" /> Updating to {update.version}. 1up opens again on its own.
+      </p>
+    );
+  return (
+    <p className="update" aria-live="polite">
+      <span className="dot ready" /> {state === 'failed' ? 'The update didn’t install.' : `1up ${update.version} is out.`}{' '}
+      <button
+        type="button"
+        className="link"
+        onClick={() => {
+          setState('running');
+          update.install().catch((e) => {
+            console.error('1up: update', e);
+            setState('failed');
+          });
+        }}
+      >
+        {state === 'failed' ? 'Try again' : 'Update'}
+      </button>
+    </p>
+  );
+}
+
 export function Rail({
   pads,
   driver,
+  update,
   current,
   onPick,
 }: {
   pads: PadView[];
   driver: Driver;
+  update: Update | null;
   current: number | null;
   onPick: (id: number) => void;
 }) {
@@ -136,6 +168,7 @@ export function Rail({
         {pads.length === 0 && <li className="pad-list-empty">No pad yet</li>}
       </ul>
       <footer className="driver">
+        {update && <UpdateNote update={update} />}
         <StartWithWindows />
         <DriverNote driver={driver} />
       </footer>
