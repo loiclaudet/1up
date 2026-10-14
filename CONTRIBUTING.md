@@ -34,6 +34,10 @@ installs it silently, checks it installed the driver, starts the installed 1up (
 then plugs a virtual xbox pad into the driver and reads it back. the installer comes out as an artifact, and a `v*`
 tag drafts a release with it as `1up-setup.exe`, the name the readme's button links to.
 
+publishing that release pushes the same installer to itch.io (`.github/workflows/itch.yml`, butler, the
+`loiclaudet/1up:windows` channel, the repo secret `BUTLER_API_KEY`). a release published before that workflow:
+`gh workflow run itch.yml -f tag=v0.1.0`.
+
 ## the demo and the pictures
 
 `pnpm demo` builds the page with its demo as one file, `dist-demo/index.html`. its url sets it up:
