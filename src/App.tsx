@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { change, demo, subscribe } from './api';
+import { change, checkUpdate, demo, subscribe, type Update } from './api';
 import * as mock from './mock';
 import type { Part } from './pictures';
 import type { Change, View } from './types';
@@ -17,12 +17,20 @@ export function App() {
   const [padId, setPadId] = useState<number | null>(demo && params.get('pad') ? Number(params.get('pad')) : null);
   const [selected, setSelected] = useState<Part | null>(demo ? ((params.get('select') as Part | null) ?? null) : null);
   const [detailsOpen, setDetailsOpen] = useState(demo && params.has('details'));
+  const [update, setUpdate] = useState<Update | null>(null);
 
   useEffect(() => {
     subscribe(setView);
     const output = params.get('output');
     if (demo && (output === 'keys' || output === 'off')) change(Number(params.get('pad') ?? 1), { do: 'output', output });
   }, []);
+
+  // at launch, once 1up knows it is on windows (a mac only previews): is a newer 1up out?
+  const windows = view !== null && view.driver !== 'preview';
+  useEffect(() => {
+    if (!windows && !demo) return;
+    checkUpdate().then(setUpdate, (e) => console.warn('1up: no update check', e));
+  }, [windows]);
 
   const pad = view?.pads.find((p) => p.id === padId) ?? view?.pads[0] ?? null;
   const send = useCallback((c: Change) => pad && change(pad.id, c), [pad]);
@@ -47,6 +55,7 @@ export function App() {
       <Rail
         pads={view.pads}
         driver={view.driver}
+        update={update}
         current={pad?.id ?? null}
         onPick={(id) => {
           setPadId(id);

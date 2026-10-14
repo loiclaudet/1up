@@ -4,6 +4,8 @@
 import { Channel, invoke } from '@tauri-apps/api/core';
 import { disable, enable, isEnabled } from '@tauri-apps/plugin-autostart';
 import { openUrl, revealItemInDir } from '@tauri-apps/plugin-opener';
+import { relaunch } from '@tauri-apps/plugin-process';
+import { check } from '@tauri-apps/plugin-updater';
 import type { Change, View } from './types';
 import * as mock from './mock';
 
@@ -45,6 +47,28 @@ export const startup = {
 export function installDriver(): Promise<boolean> {
   if (demo) return mock.installDriver();
   return invoke('install_driver');
+}
+
+/// a newer 1up, found on github: installing it closes 1up, and the installer opens it again
+export interface Update {
+  version: string;
+  install(): Promise<void>;
+}
+
+/// whether a newer 1up is out (github's latest.json, checked against 1up's signature); never in a dev build
+export async function checkUpdate(): Promise<Update | null> {
+  if (demo) return mock.update();
+  if (import.meta.env.DEV) return null;
+  const update = await check();
+  if (!update) return null;
+  return {
+    version: update.version,
+    install: async () => {
+      // on windows the installer takes over here and 1up quits; elsewhere it comes back and restarts
+      await update.downloadAndInstall();
+      await relaunch();
+    },
+  };
 }
 
 /// a link, in the person's browser

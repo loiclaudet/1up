@@ -34,6 +34,11 @@ installs it silently, checks it installed the driver, starts the installed 1up (
 then plugs a virtual xbox pad into the driver and reads it back. the installer comes out as an artifact, and a `v*`
 tag drafts a release with it as `1up-setup.exe`, the name the readme's button links to.
 
+the installer is signed for 1up's updater with the repo secret `TAURI_SIGNING_PRIVATE_KEY` (its public half in
+`tauri.conf.json`; made with `pnpm tauri signer generate --ci -w ~/.tauri/1up.key`, kept in pass at
+`1up/tauri-updater`), and the release's `latest.json` points at it: every installed 1up reads that file at launch
+(`releases/latest/download/latest.json`) and offers the update. a tag needs the key, or its build stops.
+
 publishing that release pushes the same installer to itch.io (`.github/workflows/itch.yml`, butler, the
 `loiclaudet/1up:windows` channel, the repo secret `BUTLER_API_KEY`). a release published before that workflow:
 `gh workflow run itch.yml -f tag=v0.1.0`.

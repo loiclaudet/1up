@@ -1,6 +1,7 @@
 // a demo engine for the browser: a pad of each family, their profiles changed as the app would. the url drives it for
 // screenshots: ?press=a,up holds controls on the pad shown, ?left=-30000,0 pushes its left stick, ?driver=ready shows
-// windows with the driver (missing: without it; the default, preview: a mac), ?pads=snes,nes plugs in those families
+// windows with the driver (missing: without it; the default, preview: a mac), ?pads=snes,nes plugs in those families,
+// ?update=0.1.1 has a newer 1up out
 
 import { controlsOf, defaultProfile, presetXbox, sticksOf } from './profile';
 import type { Change, Control, Driver, Family, PadView, View } from './types';
@@ -123,6 +124,16 @@ export function installDriver(): Promise<boolean> {
       done(true);
     }, 1800),
   );
+}
+
+/// the demo's newer 1up, when the url names one: installing it takes a moment, then the page reloads
+export function update(): Promise<{ version: string; install(): Promise<void> } | null> {
+  const version = params.get('update');
+  if (!version) return Promise.resolve(null);
+  return Promise.resolve({
+    version,
+    install: () => new Promise<void>((done) => setTimeout(() => (location.search = '', done()), 2400)),
+  });
 }
 
 /// the demo's login item
